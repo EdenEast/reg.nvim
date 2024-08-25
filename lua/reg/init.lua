@@ -1,5 +1,5 @@
-local util = require("regedit.util")
-local config = require("regedit.config")
+local util = require("reg.util")
+local config = require("reg.config")
 
 local M = {}
 

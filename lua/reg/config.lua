@@ -13,7 +13,7 @@ end
 
 local default_config = {
   registers = list_registers(),
-  cache_file = vim.fn.stdpath("cache") .. path_sep .. "regedit.json",
+  cache_file = vim.fn.stdpath("cache") .. path_sep .. "reg.json",
   editor = {
     width = 100,
     height = 2,
