@@ -4,7 +4,7 @@ local base64 = {}
 
 local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-base64.enc = function(data)
+base64.encode = function(data)
   return (
     (data:gsub(".", function(x)
       local r, t = "", x:byte()
@@ -25,7 +25,7 @@ base64.enc = function(data)
   )
 end
 
-base64.dec = function(data)
+base64.decode = function(data)
   data = string.gsub(data, "[^" .. chars .. "=]", "")
   return (
     data

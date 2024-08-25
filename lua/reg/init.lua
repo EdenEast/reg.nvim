@@ -34,4 +34,30 @@ function M.edit(opts)
   end
 end
 
+function M.save(opts)
+  opts = opts or {}
+  local file = opts.file or config.cache_file
+
+  local function inner(char)
+    vim.ui.input({ prompt = "Description: " }, function(description)
+      util.store_register(char, description, file)
+    end)
+  end
+
+  if opts.picker == "select" then
+    local registers = util.generate_register_item_list(config.registers)
+    vim.ui.select(registers, {
+      prompt = "Select Register: ",
+      format_item = function(item)
+        return string.format([["%s  %s]], item.label, item.value)
+      end,
+    }, function(register, _)
+      inner(register.label)
+    end)
+  else
+    print("Select Register: ")
+    inner(util.getchar())
+  end
+end
+
 return M

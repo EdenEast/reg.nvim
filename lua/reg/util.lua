@@ -1,4 +1,45 @@
+local base64 = require("reg.base64")
 local M = {}
+
+local function djb2(str)
+  local hash = 5381
+  for i = 1, #str do
+    hash = bit.lshift(hash, 5) + hash + str:byte(i)
+  end
+  return hash
+end
+
+local function save_data(data, path)
+  local file = io.open(path, "w")
+  if not file then
+    vim.notify("Failed to open file: " .. path, vim.log.levels.ERROR)
+    return
+  end
+
+  local content = vim.fn.json_encode(data)
+  file:write(content)
+  file:close()
+end
+
+local function load_data(path)
+  if vim.fn.filereadable(path) ~= 0 then
+    local file = io.open(path, "r")
+    if not file then
+      vim.notify("Failed to open file: " .. path, vim.log.levels.ERROR)
+      return {}
+    end
+
+    local content = file:read("*a")
+    file:close()
+
+    if content == "" then
+      return {}
+    end
+
+    return vim.fn.json_decode(content)
+  end
+  return {}
+end
 
 function M.getchar()
   local i = vim.fn.getchar()
@@ -22,6 +63,40 @@ function M.generate_register_item_list(registers)
   end
 
   return items
+end
+
+function M.store_register(register, description, path)
+  local reg = vim.fn.getreg(register)
+  if not reg then
+    vim.notify("Register is empty", vim.log.levels.WARN)
+    return
+  end
+
+  local regtype = vim.fn.getregtype(register)
+  local data = load_data(path)
+
+  local key = tostring(djb2(description))
+  data[key] = {
+    type = regtype,
+    description = description,
+    content = base64.encode(reg),
+  }
+
+  save_data(data, path)
+end
+
+function M.load_register(register, description, path)
+  local key = tostring(djb2(description))
+  local data = load_data(path)
+  local item = data[key]
+
+  if not item then
+    vim.notify("No saved register found with description: " .. description, vim.log.levels.ERROR)
+    return
+  end
+
+  local content = base64.decode(item.content)
+  vim.fn.setreg(register, content, item.type)
 end
 
 function M.create_edit_buffer(register)
