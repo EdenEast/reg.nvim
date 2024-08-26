@@ -1,18 +1,15 @@
 local path_sep = jit and (jit.os == "Windows" and "\\" or "/") or package.config:sub(1, 1)
 
-local function list_registers()
-  local registers = { '"', "-", "#", "=", "/", "*", "+", ":", ".", "%", "#" }
-  for i = 0, 9 do
-    table.insert(registers, tostring(i))
-  end
-  for i = 97, 122 do
-    table.insert(registers, string.char(i))
-  end
-  return registers
-end
+-- stylua: ignore
+local valid_registers = {
+  '"', "-", "#", "=", "/", "*", "+", ":", ".", "%", "#",
+  "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+  "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+  "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+}
 
 local default_config = {
-  registers = list_registers(),
+  registers = vim.deepcopy(valid_registers),
   cache_file = vim.fn.stdpath("cache") .. path_sep .. "reg.json",
   editor = {
     width = 100,
@@ -24,6 +21,11 @@ local default_config = {
 
 local Config = {}
 Config.options = vim.deepcopy(default_config)
+Config.valid_registers = valid_registers
+
+function Config:is_valid_register(char)
+  return vim.tbl_contains(self.options.registers, char)
+end
 
 setmetatable(Config, {
   __index = function(self, key)

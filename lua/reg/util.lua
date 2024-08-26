@@ -47,7 +47,7 @@ function M.getchar()
 end
 
 function M.generate_register_item_list(registers)
-  registers = registers or require("regedit.config").registers
+  registers = registers or require("reg.config").registers
 
   local items = {}
 
@@ -60,6 +60,25 @@ function M.generate_register_item_list(registers)
       value = content,
       type = regtype,
     })
+  end
+
+  return items
+end
+
+function M.generate_macro_item_list(file)
+  file = file or require("reg.config").cache_file
+
+  local data = load_data(file)
+  local items = {}
+
+  for key, value in pairs(data) do
+    local item = {
+      key = key,
+      description = value.description,
+      value = base64.decode(value.content),
+      type = value.type,
+    }
+    table.insert(items, item)
   end
 
   return items
